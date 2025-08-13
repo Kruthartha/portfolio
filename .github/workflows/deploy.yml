@@ -18,8 +18,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Add the server's public key to known_hosts for improved security
-          ssh-known-hosts: ${{ secrets.SERVER_KNOWN_HOSTS }} 
+          ssh-known-hosts: ${{ secrets.SERVER_KNOWN_HOSTS }}
 
       - name: Deploy to Server
         env:
@@ -27,39 +26,33 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_IP }}
           PROJECT_PATH: ~/Portfolio/portfolio
         run: |
-          # Use a more reliable way to get the branch name
           BRANCH=${{ github.ref_name }}
           echo "Current branch is: $BRANCH"
-          
-          # Use a consistent SSH command throughout
+
           SSH_CMD="ssh -o StrictHostKeyChecking=yes $SERVER_USER@$SERVER_HOST"
 
           if [ "$BRANCH" == "dev" ]; then
             echo "Deploying Development branch..."
             $SSH_CMD << 'EOF'
-            set -e  # Exit immediately if a command exits with a non-zero status.
-            cd $PROJECT_PATH
-            git checkout dev
-            git pull
-            npm install
-            # Add build step if necessary
-            # npm run build
-            pm2 describe dev_app || pm2 start index.js --name dev_app
-            pm2 restart dev_app
+set -e
+cd $PROJECT_PATH
+git checkout dev
+git pull
+npm install
+pm2 describe dev_app || pm2 start index.js --name dev_app
+pm2 restart dev_app
 EOF
 
           elif [ "$BRANCH" == "main" ]; then
             echo "Deploying Production branch..."
             $SSH_CMD << 'EOF'
-            set -e
-            cd $PROJECT_PATH
-            git checkout main
-            git pull
-            npm install
-            # Add build step if necessary
-            # npm run build
-            pm2 describe prod_app || pm2 start index.js --name prod_app
-            pm2 restart prod_app
+set -e
+cd $PROJECT_PATH
+git checkout main
+git pull
+npm install
+pm2 describe prod_app || pm2 start index.js --name prod_app
+pm2 restart prod_app
 EOF
 
           else
