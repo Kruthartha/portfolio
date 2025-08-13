@@ -23,7 +23,7 @@ jobs:
         run: |
           if [ "${GITHUB_REF##*/}" == "development" ]; then
             echo "Deploying Development branch..."
-            ssh -o StrictHostKeyChecking=no user@dev_server_ip "
+            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 "
               cd ~/Portfolio/portfolio &&
               git checkout development &&
               git pull &&
@@ -34,7 +34,7 @@ jobs:
 
           if [ "${GITHUB_REF##*/}" == "main" ]; then
             echo "Deploying Production branch..."
-            ssh -o StrictHostKeyChecking=no user@prod_server_ip "
+            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 "
               cd ~/Portfolio/portfolio &&
               git checkout main &&
               git pull &&
