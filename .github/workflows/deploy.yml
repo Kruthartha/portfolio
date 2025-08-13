@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - development
+      - dev
       - main
 
 jobs:
@@ -23,11 +23,11 @@ jobs:
         run: |
           BRANCH=${GITHUB_REF##*/}
 
-          if [ "$BRANCH" == "development" ]; then
+          if [ "$BRANCH" == "dev" ]; then
             echo "Deploying Development branch..."
             ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 << 'EOF'
               cd ~/Portfolio/portfolio
-              git checkout development
+              git checkout dev
               git pull
               npm install
               pm2 describe dev_app || pm2 start index.js --name dev_app
