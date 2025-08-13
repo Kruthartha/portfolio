@@ -26,23 +26,23 @@ jobs:
           if [ "$BRANCH" == "dev" ]; then
             echo "Deploying Development branch..."
             ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 << 'EOF'
-              cd ~/Portfolio/portfolio
-              git checkout dev
-              git pull
-              npm install
-              pm2 describe dev_app || pm2 start index.js --name dev_app
-              pm2 restart dev_app
-            EOF
+cd ~/Portfolio/portfolio
+git checkout dev
+git pull
+npm install
+pm2 describe dev_app || pm2 start index.js --name dev_app
+pm2 restart dev_app
+EOF
           fi
 
           if [ "$BRANCH" == "main" ]; then
             echo "Deploying Production branch..."
             ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 << 'EOF'
-              cd ~/Portfolio/portfolio
-              git checkout main
-              git pull
-              npm install
-              pm2 describe prod_app || pm2 start index.js --name prod_app
-              pm2 restart prod_app
-            EOF
+cd ~/Portfolio/portfolio
+git checkout main
+git pull
+npm install
+pm2 describe prod_app || pm2 start index.js --name prod_app
+pm2 restart prod_app
+EOF
           fi
