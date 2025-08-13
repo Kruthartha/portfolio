@@ -21,24 +21,28 @@ jobs:
 
       - name: Deploy
         run: |
-          if [ "${GITHUB_REF##*/}" == "development" ]; then
+          BRANCH=${GITHUB_REF##*/}
+
+          if [ "$BRANCH" == "development" ]; then
             echo "Deploying Development branch..."
-            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 "
-              cd ~/Portfolio/portfolio &&
-              git checkout development &&
-              git pull &&
-              npm install &&
-              pm2 restart dev_app || pm2 start index.js --name dev_app
-            "
+            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 << 'EOF'
+              cd ~/Portfolio/portfolio
+              git checkout development
+              git pull
+              npm install
+              pm2 describe dev_app || pm2 start index.js --name dev_app
+              pm2 restart dev_app
+            EOF
           fi
 
-          if [ "${GITHUB_REF##*/}" == "main" ]; then
+          if [ "$BRANCH" == "main" ]; then
             echo "Deploying Production branch..."
-            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 "
-              cd ~/Portfolio/portfolio &&
-              git checkout main &&
-              git pull &&
-              npm install &&
-              pm2 restart prod_app || pm2 start index.js --name prod_app
-            "
+            ssh -o StrictHostKeyChecking=no kruthartha@51.75.18.220 << 'EOF'
+              cd ~/Portfolio/portfolio
+              git checkout main
+              git pull
+              npm install
+              pm2 describe prod_app || pm2 start index.js --name prod_app
+              pm2 restart prod_app
+            EOF
           fi
