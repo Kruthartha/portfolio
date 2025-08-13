@@ -1,5 +1,4 @@
 name: Deploy to Server
-
 on:
   push:
     branches:
@@ -9,52 +8,43 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v4
+        
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: ${{ secrets.SERVER_KNOWN_HOSTS }}
-
+          
       - name: Deploy to Server
         env:
           SERVER_USER: kruthartha
           SERVER_HOST: ${{ secrets.SERVER_IP }}
-          PROJECT_PATH: ~/Portfolio/portfolio
         run: |
           BRANCH=${{ github.ref_name }}
           echo "Current branch is: $BRANCH"
-
-          SSH_CMD="ssh -o StrictHostKeyChecking=yes $SERVER_USER@$SERVER_HOST"
-
+          
           if [ "$BRANCH" == "dev" ]; then
             echo "Deploying Development branch..."
-            $SSH_CMD << 'EOF'
-set -e
-cd $PROJECT_PATH
-git checkout dev
-git pull
-npm install
-pm2 describe dev_app || pm2 start index.js --name dev_app
-pm2 restart dev_app
-EOF
-
+            ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+              set -e
+              cd ~/Portfolio/portfolio
+              git checkout dev
+              git pull
+              npm install
+              pm2 reload dev_app 2>/dev/null || pm2 start index.js --name dev_app
+          EOF
           elif [ "$BRANCH" == "main" ]; then
             echo "Deploying Production branch..."
-            $SSH_CMD << 'EOF'
-set -e
-cd $PROJECT_PATH
-git checkout main
-git pull
-npm install
-pm2 describe prod_app || pm2 start index.js --name prod_app
-pm2 restart prod_app
-EOF
-
+            ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+              set -e
+              cd ~/Portfolio/portfolio
+              git checkout main
+              git pull
+              npm install
+              pm2 reload prod_app 2>/dev/null || pm2 start index.js --name prod_app
+          EOF
           else
             echo "No deployment defined for branch: $BRANCH"
             exit 1
