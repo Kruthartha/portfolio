@@ -1,0 +1,44 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - development
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy
+      run: |
+        if [ "${GITHUB_REF##*/}" == "development" ]; then
+          echo "Deploying Development branch..."
+          ssh -o StrictHostKeyChecking=no user@dev_server_ip "
+            cd ~/Portfolio/portfolio &&
+            git checkout development &&
+            git pull &&
+            npm install &&
+            pm2 restart dev_app || pm2 start index.js --name dev_app
+          "
+        fi
+
+        if [ "${GITHUB_REF##*/}" == "main" ]; then
+          echo "Deploying Production branch..."
+          ssh -o StrictHostKeyChecking=no user@prod_server_ip "
+            cd ~/Portfolio/portfolio &&
+            git checkout main &&
+            git pull &&
+            npm install &&
+            pm2 restart prod_app || pm2 start index.js --name prod_app
+          "
+        fi
